@@ -1,0 +1,27 @@
+.save-post-button {
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont;
+}
+
+.save-post-button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.button-icon {
+    font-size: 16px;
+}
