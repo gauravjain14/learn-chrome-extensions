@@ -1,0 +1,37 @@
+s<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            width: 400px; 
+            padding: 10px; 
+        }
+        button { 
+            width: 100%; 
+            margin: 5px 0; 
+            padding: 8px;
+        }
+        .post {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .author {
+            font-weight: bold;
+        }
+        #postsContainer {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <button id="savePost">Save Current Post</button>
+    <button id="viewPosts">View Saved Posts</button>
+    <div id="status"></div>
+    <div id="postsContainer"></div>
+    <div id="savedPosts"></div>
+    <script src="content.js"></script>  <!-- Add this line -->
+    <script src="popup.js"></script>
+</body>
+</html>

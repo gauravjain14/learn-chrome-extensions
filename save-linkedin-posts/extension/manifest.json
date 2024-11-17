@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "LinkedIn Post Saver",
+    "version": "1.0",
+    "description": "Save LinkedIn posts to local MongoDB database",
+    "permissions": [
+      "activeTab",
+      "storage",
+      "scripting"
+    ],
+    "host_permissions": [
+      "https://www.linkedin.com/*"
+    ],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://www.linkedin.com/*"],
+        "js": ["content.js"]
+      }
+    ]
+  }
