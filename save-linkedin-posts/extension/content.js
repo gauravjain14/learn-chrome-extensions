@@ -15,14 +15,6 @@ function extractPostContent() {
     };
 
     return JSON.parse(JSON.stringify(data));
-    /* return {
-      author,
-      timestamp,
-      content,
-      likes,
-      url: window.location.href,
-      savedAt: new Date().toISOString()
-    }; */
   }
 
 // content.js
@@ -182,10 +174,10 @@ function createSaveButton() {
     // Create the button content
     button.innerHTML = `
         <svg role="none" aria-hidden="true" class="artdeco-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path d="M16 3H8C6.9 3 6 3.9 6 5v16l6-3 6 3V5c0-1.1-.9-2-2-2zm0 14.5l-4-2-4 2V5h8v12.5z" fill="currentColor"/>
+            <path d="M20 4v16H4V4h16m2-2H2v20h20V2zM12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/>
         </svg>
         <span class="artdeco-button__text">
-            <span class="artdeco-button__text social-action-button__text">Save</span>
+            <span class="artdeco-button__text social-action-button__text">Vault</span>
         </span>
     `;
 
@@ -222,18 +214,33 @@ const addSuggestionButton = (commentBox) => {
             e.preventDefault();
             e.stopPropagation();
 
-            const post = actionBar.closest('.feed-shared-update-v2');
-            if (!post) return;
+            // Find the post container by traversing up from the button
+            const postContainer = actionBar.closest('.feed-shared-update-v2');
 
-            try {
+            if (!postContainer) {
+                console.error('Could not find post container');
+                return;
+            }
+
+            try {                // Get the post data
                 const data = {
-                    author: post.querySelector('.feed-shared-actor__name')?.textContent?.trim(),
-                    content: post.querySelector('.feed-shared-text')?.textContent?.trim(),
-                    timestamp: post.querySelector('.feed-shared-actor__sub-description')?.textContent?.trim(),
-                    likes: post.querySelector('.social-details-social-counts__reactions-count')?.textContent?.trim(),
-                    url: window.location.href,
+                    author: postContainer.querySelector(
+                        '.update-components-actor__name span[dir="ltr"] span[aria-hidden="true"]')?.textContent?.trim(),
+                    content: postContainer.querySelector(
+                        '.feed-shared-update-v2__description-wrapper')?.textContent?.trim(),
+                    timestamp: postContainer.querySelector(
+                        '.update-components-actor__sub-description')?.textContent?.trim(),
+                    likes: postContainer.querySelector(
+                        '.social-details-social-counts__reactions-count')?.textContent?.trim(),
+                    url: postContainer.querySelector(
+                        '.update-components-actor__sub-description-link')?.href || window.location.href,
                     savedAt: new Date().toISOString()
                 };
+
+                // Check if author in data is null. If yes, raise an Exception
+                 if (!data?.author) {
+                     throw new Error('No author found');
+                 }
 
                 const response = await fetch('http://localhost:3000/api/posts', {
                     method: 'POST',
@@ -245,13 +252,19 @@ const addSuggestionButton = (commentBox) => {
 
                 if (response.ok) {
                     const buttonText = saveButton.querySelector('.social-action-button__text');
-                    buttonText.textContent = 'Saved';
+                    /* Don't change the state */
+                    /* buttonText.textContent = 'Saved';
                     setTimeout(() => {
                         buttonText.textContent = 'Save';
-                    }, 2000);
+                    }, 2000); */
                 }
             } catch (error) {
                 console.error('Error saving post:', error);
+                const buttonText = saveButton.querySelector('.social-action-button__text');
+                buttonText.textContent = 'Error';
+                setTimeout(() => {
+                    buttonText.textContent = 'Save';
+                }, 2000);
             }
         });
 

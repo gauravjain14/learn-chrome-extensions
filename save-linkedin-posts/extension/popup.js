@@ -1,19 +1,3 @@
-document.getElementById('savePost').addEventListener('click', async () => {
-    const statusDiv = document.getElementById('status');
-    statusDiv.textContent = 'Extracting post data...';
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: extractLinkedInData
-    }, (results) => {
-      if (results && results[0]) {
-        console.log('Sending to backend: ', results[0].result);
-        sendToBackend(results[0].result);
-      }
-    });
-  });
-  
 function sendToBackend(postData) {
   // Replace with your MongoDB API endpoint
   fetch('http://localhost:3000/api/posts', {
@@ -33,10 +17,9 @@ function sendToBackend(postData) {
 }
 
   // Add this to your existing popup.js
-document.getElementById('viewPosts').addEventListener('click', async () => {
+async function loadPosts() {
   const statusDiv = document.getElementById('status');
   const postsContainer = document.getElementById('postsContainer');
-  statusDiv.textContent = 'Loading posts...';
 
   try {
       const response = await fetch('http://localhost:3000/api/posts');
@@ -46,9 +29,12 @@ document.getElementById('viewPosts').addEventListener('click', async () => {
 
       const posts = await response.json();
       if (posts.length === 0) {
-          postsContainer.innerHTML = '<p>No saved posts found.</p>';
+          postsContainer.innerHTML = '<p>No saved posts found in the vault.</p>';
           return;
       }
+
+      // Sort posts by savedAt date (newest first)
+      posts.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
 
       posts.forEach(post => {
           const postElement = document.createElement('div');
@@ -64,15 +50,11 @@ document.getElementById('viewPosts').addEventListener('click', async () => {
           `;
           postsContainer.appendChild(postElement);
       });
-      
-      statusDiv.textContent = `Loaded ${posts.length} posts`;
   } catch (error) {
       console.error('Error details:', error);
       statusDiv.textContent = 'Error loading posts: ' + error.message;
   }
-});
+};
 
 // Optional: Load posts automatically when popup opens
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('viewPosts').click();
-});
+document.addEventListener('DOMContentLoaded', loadPosts);
