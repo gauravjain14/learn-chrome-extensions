@@ -215,25 +215,61 @@ const addSuggestionButton = (commentBox) => {
             e.stopPropagation();
 
             // Find the post container by traversing up from the button
-            const postContainer = actionBar.closest('.feed-shared-update-v2');
+            const postContainer = actionBar.closest(
+                '.feed-shared-update-v2 .feed-shared-update-v2__control-menu-container');
 
             if (!postContainer) {
                 console.error('Could not find post container');
                 return;
             }
 
-            try {                // Get the post data
+            try {
+                // Get the post data
+                // These fields are captured by inspecting the HTML. Need to find a better way to capture
+                // this information.
+                function extractPostInfo(postElement) {
+                    const userName = postElement.querySelector(".update-components-actor__name")?.querySelector('span[aria-hidden="true"]')?.textContent.trim() || "";
+                    const userImageUrl = postElement.querySelector(".update-components-actor__avatar-image")?.src || "";
+                    const userDescription = postElement.querySelector(".update-components-actor__description")?.textContent.trim() || "";
+                    const postText = postElement.querySelector(".update-components-text")?.textContent.trim() || "";
+                    const postImageUrl = postElement.querySelector(".update-components-image__image-link img")?.src || null;
+                    const postContainer = postElement.closest(".feed-shared-update-v2");
+                    let activityId = "";
+                    if (postContainer) {
+                        const dataUrn = postContainer.getAttribute("data-urn");
+                        if (dataUrn) {
+                            const match = dataUrn.match(/activity:(\d+)/);
+                            if (match && match[1]) {
+                                activityId = match[1];
+                            }
+                        }
+                    }
+                    // Construct post URL using activity ID
+                    const postUrl = activityId ? `https://www.linkedin.com/feed/update/urn:li:activity:${activityId}/` : "";
+                    return {
+                        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                        userName,
+                        userImageUrl,
+                        userDescription,
+                        postText,
+                        postImageUrl,
+                        postUrl
+                    };
+                };
+                extractedData = extractPostInfo(postContainer);
+
+                // This is old code but sticking with using it for now. But can switch to using
+                // the extractedData
                 const data = {
                     author: postContainer.querySelector(
-                        '.update-components-actor__name span[dir="ltr"] span[aria-hidden="true"]')?.textContent?.trim(),
+                        '.update-components-actor__title [aria-hidden="true"]')?.innerText?.trim(), // Adjust selector
                     content: postContainer.querySelector(
-                        '.feed-shared-update-v2__description-wrapper')?.textContent?.trim(),
+                        '.update-components-text')?.textContent?.trim(),
                     timestamp: postContainer.querySelector(
                         '.update-components-actor__sub-description')?.textContent?.trim(),
                     likes: postContainer.querySelector(
                         '.social-details-social-counts__reactions-count')?.textContent?.trim(),
-                    url: postContainer.querySelector(
-                        '.update-components-actor__sub-description-link')?.href || window.location.href,
+                    url: extractedData.postUrl,
                     savedAt: new Date().toISOString()
                 };
 
@@ -262,9 +298,9 @@ const addSuggestionButton = (commentBox) => {
                 console.error('Error saving post:', error);
                 const buttonText = saveButton.querySelector('.social-action-button__text');
                 buttonText.textContent = 'Error';
-                setTimeout(() => {
-                    buttonText.textContent = 'Save';
-                }, 2000);
+                // setTimeout(() => {
+                //     buttonText.textContent = 'Save';
+                // }, 2000);
             }
         });
 
