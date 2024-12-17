@@ -5,7 +5,6 @@ const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const axios = require("axios");
 const app = express();
-const { OpenAIEmbeddings } = require('@langchain/openai');
 
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
@@ -17,7 +16,7 @@ const client = new MongoClient(uri);
 // app.use(cors());
 app.use(cors({
     origin: '*', // Allow all origins
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
 
@@ -86,6 +85,24 @@ app.post('/api/search', async (req, res) => {
       res.status(500).json({ error: error.message });
   }
 });
+
+app.delete("/clear-database", async (req, res) => {
+  try {
+      await client.connect();
+      const database = client.db("linkedin_posts");
+      const collection = database.collection("posts");
+
+      // Drop the entire collection
+      await collection.drop();
+      res.status(200).json({ success: true, message: "Database cleared successfully." });
+  } catch (error) {
+      console.error("Error clearing database:", error);
+      res.status(500).json({ success: false, message: "Failed to clear database." });
+  } finally {
+      await client.close();
+  }
+});
+
 
 const PORT = 3000;
 app.listen(PORT, () => {

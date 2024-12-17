@@ -177,7 +177,7 @@ function createSaveButton() {
             <path d="M20 4v16H4V4h16m2-2H2v20h20V2zM12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/>
         </svg>
         <span class="artdeco-button__text">
-            <span class="artdeco-button__text social-action-button__text">Vault</span>
+            <span class="artdeco-button__text social-action-button__text">Save</span>
         </span>
     `;
 
@@ -261,6 +261,7 @@ const addSuggestionButton = (commentBox) => {
                 // This is old code but sticking with using it for now. But can switch to using
                 // the extractedData
                 const data = {
+                    id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                     author: postContainer.querySelector(
                         '.update-components-actor__title [aria-hidden="true"]')?.innerText?.trim(), // Adjust selector
                     content: postContainer.querySelector(
@@ -288,19 +289,12 @@ const addSuggestionButton = (commentBox) => {
 
                 if (response.ok) {
                     const buttonText = saveButton.querySelector('.social-action-button__text');
-                    /* Don't change the state */
-                    /* buttonText.textContent = 'Saved';
-                    setTimeout(() => {
-                        buttonText.textContent = 'Save';
-                    }, 2000); */
+                    // Pending Saved
                 }
             } catch (error) {
                 console.error('Error saving post:', error);
                 const buttonText = saveButton.querySelector('.social-action-button__text');
                 buttonText.textContent = 'Error';
-                // setTimeout(() => {
-                //     buttonText.textContent = 'Save';
-                // }, 2000);
             }
         });
 
@@ -320,6 +314,15 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, {
     childList: true,
     subtree: true
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'databaseCleared') {
+        // React to the database clearing action (e.g., update UI)
+        alert("Database has been cleared!");
+        // Optionally, clear displayed data
+        document.getElementById('postsContainer').innerHTML = '';
+    }
 });
 
 // Log for debugging

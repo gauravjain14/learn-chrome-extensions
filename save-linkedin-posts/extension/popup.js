@@ -56,7 +56,6 @@ async function loadPosts() {
   }
 };
 
-// Optional: Load posts automatically when popup opens
 document.addEventListener('DOMContentLoaded', loadPosts);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -85,8 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function displaySearchResults(results) {
-    console.log('Displaying search results:', results);
-
     // Create a new page
     const newPage = window.open('', '_blank');
     if (!newPage) {
@@ -149,7 +146,7 @@ function displaySearchResults(results) {
                             ${post.author || 'Unknown Author'}
                         </div>
                         <div class="content">
-                            ${post.content || 'No content'}
+                            ${post.document || 'No content'}
                         </div>
                         <div class="meta">
                             ${post.url ? `<a href="${post.url}" target="_blank">View Post</a><br>` : ''}
@@ -248,3 +245,33 @@ function createSearchDialog(results) {
     // Show dialog
     dialog.showModal();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const clearButton = document.getElementById('clearDatabasesButton');
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear the database? This action cannot be undone.")) {
+                // Send a message to the background script
+                chrome.runtime.sendMessage({ action: 'clearDatabases' }, (response) => {
+                    if (response?.success) {
+                        alert("Database cleared successfully!");
+                    } else {
+                        alert("Failed to clear the database.");
+                    }
+                });
+
+                // clear chromaDB embeddings
+                chrome.runtime.sendMessage({ action: 'clearChromaDB' }, (chromaResponse) => {
+                    console.log("Chroma Response ", chromaResponse);
+                    if (chromaResponse?.success) {
+                        console.log("ChromaDB cleared successfully.");
+                    } else {
+                        console.error("Failed to clear ChromaDB.");
+                    }
+                });
+            }
+        });
+    } else {
+        console.error("Clear Database button not found!");
+    }
+});
