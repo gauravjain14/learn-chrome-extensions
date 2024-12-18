@@ -40,4 +40,4 @@
 5. To clear all saved posts from the database, click on the extension icon and select "Clear Databases".
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the Apache 2.0 License.
